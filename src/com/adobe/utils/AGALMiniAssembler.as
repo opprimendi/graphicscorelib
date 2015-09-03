@@ -35,7 +35,7 @@ package com.adobe.utils
 	
 	public class AGALMiniAssembler
 	{
-		protected static const USE_NEW_SYNTAX:Boolean;
+		protected static const USE_NEW_SYNTAX:Boolean = false;
 		
 		protected static const REGEXP_OUTER_SPACES:RegExp = /^\s+|\s+$/g;
 		
