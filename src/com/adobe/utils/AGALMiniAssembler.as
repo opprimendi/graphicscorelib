@@ -35,7 +35,7 @@ package com.adobe.utils
 	
 	public class AGALMiniAssembler
 	{
-		protected static const USE_NEW_SYNTAX:Boolean;
+		protected static const USE_NEW_SYNTAX:Boolean = false;
 		
 		protected static const REGEXP_OUTER_SPACES:RegExp = /^\s+|\s+$/g;
 		
@@ -60,12 +60,12 @@ package com.adobe.utils
 		
 		public function assemble(mode:String, source:String):ByteArray
 		{
-			var start:uint = getTimer();
+			var start:int = verbose ? getTimer() : 0;
 			
 			_agalcode = new ByteArray();
 			_error = "";
 			
-			var isFrag:Boolean = false;
+			var isFrag:Boolean;
 			
 			if (mode == FRAGMENT)
 				isFrag = true;
@@ -73,14 +73,14 @@ package com.adobe.utils
 				_error = 'ERROR: mode needs to be "' + FRAGMENT + '" or "' + VERTEX + '" but is "' + mode + '".';
 			
 			agalcode.endian = Endian.LITTLE_ENDIAN;
-			agalcode.writeByte(0xa0);				// tag version
-			agalcode.writeUnsignedInt(0x1);		// AGAL version, big endian, bit pattern will be 0x01000000
-			agalcode.writeByte(0xa1);				// tag program id
-			agalcode.writeByte(isFrag ? 1 : 0);	// vertex or fragment
+			agalcode.writeByte(0xa0);// tag version
+			agalcode.writeUnsignedInt(0x1);// AGAL version, big endian, bit pattern will be 0x01000000
+			agalcode.writeByte(0xa1);// tag program id
+			agalcode.writeByte(isFrag ? 1 : 0);// vertex or fragment
 			
 			var lines:Array = source.replace(/[\f\n\r\v]+/g, "\n").split("\n");
-			var nest:int = 0;
-			var nops:int = 0;
+			var nest:int;
+			var nops:int;
 			var i:int;
 			var lng:int = lines.length;
 			
@@ -108,7 +108,7 @@ package com.adobe.utils
 				if (!opCode) 
 				{
 					if (line.length >= 3)
-						trace("warning: bad line "+i+": "+lines[i]);
+						trace("warning: bad line " + i + ": " + lines[i]);
 					continue;
 				}
 				var opFound:OpCode = OPMAP[opCode[0]];
@@ -120,7 +120,7 @@ package com.adobe.utils
 				if (opFound == null)
 				{
 					if (line.length >= 3)
-						trace("warning: bad line "+i+": "+lines[i]);
+						trace("warning: bad line " + i + ": " + lines[i]);
 					continue;
 				}
 				
@@ -141,7 +141,7 @@ package com.adobe.utils
 					nest++;
 					if (nest > MAX_NESTING)
 					{
-						_error = "error: nesting to deep, maximum allowed is "+MAX_NESTING+".";
+						_error = "error: nesting to deep, maximum allowed is " + MAX_NESTING + ".";
 						break;
 					}
 				}
@@ -158,7 +158,7 @@ package com.adobe.utils
 				
 				if (nops > MAX_OPCODES)
 				{
-					_error = "error: too many opcodes. maximum is "+MAX_OPCODES+".";
+					_error = "error: too many opcodes. maximum is " + MAX_OPCODES + ".";
 					break;
 				}
 				
@@ -171,8 +171,8 @@ package com.adobe.utils
 				
 				if (!regs || regs.length != opFound.numRegister)
 				{
-					_error = "error: wrong number of operands. found "+regs.length+" but expected "+opFound.numRegister+".";
-					break;					
+					_error = "error: wrong number of operands. found " + regs.length + " but expected " + opFound.numRegister + ".";
+					break;		
 				}
 				
 				var badreg:Boolean;
@@ -193,9 +193,9 @@ package com.adobe.utils
 					}
 					
 					var res:Array = regs[j].match(/^\b[A-Za-z]{1,2}/ig);
-					if (!res) 
+					if (!res)
 					{
-						_error = "error: could not parse operand "+j+" ("+regs[j]+").";
+						_error = "error: could not parse operand " + j + " (" + regs[j] + ").";
 						badreg = true;
 						break;
 					}
@@ -207,7 +207,7 @@ package com.adobe.utils
 					
 					if (regFound == null)
 					{
-						_error = "error: could not parse operand "+j+" ("+regs[j]+").";
+						_error = "error: could not parse operand " + j + " (" + regs[j] + ").";
 						badreg = true;
 						break;
 					}
@@ -216,22 +216,22 @@ package com.adobe.utils
 					{
 						if (!(regFound.flags & REG_FRAG))
 						{
-							_error = "error: register operand "+j+" ("+regs[j]+") only allowed in vertex programs.";
+							_error = "error: register operand " + j + " (" + regs[j] + ") only allowed in vertex programs.";
 							badreg = true;
 							break;
 						}
 						if (isRelative)
 						{
-							_error = "error: register operand "+j+" ("+regs[j]+") relative adressing not allowed in fragment programs.";
+							_error = "error: register operand " + j + " (" + regs[j] + ") relative adressing not allowed in fragment programs.";
 							badreg = true;
 							break;
-						}			
+						}
 					}
 					else
 					{
 						if (!(regFound.flags & REG_VERT))
 						{
-							_error = "error: register operand "+j+" ("+regs[j]+") only allowed in fragment programs.";
+							_error = "error: register operand " + j + " (" + regs[j] + ") only allowed in fragment programs.";
 							badreg = true;
 							break;
 						}
@@ -247,7 +247,7 @@ package com.adobe.utils
 					
 					if (regFound.range < regidx)
 					{
-						_error = "error: register operand "+j+" ("+regs[j]+") index exceeds limit of "+(regFound.range+1)+".";
+						_error = "error: register operand " + j + " (" + regs[j] + ") index exceeds limit of " + (regFound.range+1) + ".";
 						badreg = true;
 						break;
 					}
@@ -262,15 +262,15 @@ package com.adobe.utils
 					
 					if (isDest && isRelative)
 					{
-						_error = "error: relative can not be destination";	
-						badreg = true; 
-						break;								
+						_error = "error: relative can not be destination";
+						badreg = true;
+						break;						
 					}
 					
 					if (maskmatch)
 					{
 						regmask = 0;
-						var cv:uint; 
+						var cv:uint;
 						var maskLength:uint = maskmatch[0].length;
 						for (var k:int = 1; k < maskLength; k++)
 						{
@@ -293,8 +293,8 @@ package com.adobe.utils
 					
 					if (isRelative)
 					{
-						var relname:Array = relreg[0].match(/[A-Za-z]{1,2}/ig);						
-						var regFoundRel:Register = REGMAP[relname[0]];						
+						var relname:Array = relreg[0].match(/[A-Za-z]{1,2}/ig);
+						var regFoundRel:Register = REGMAP[relname[0]];
 						if (regFoundRel == null)
 						{ 
 							_error = "error: bad index register"; 
@@ -303,55 +303,56 @@ package com.adobe.utils
 						}
 						reltype = regFoundRel.emitCode;
 						var selmatch:Array = relreg[0].match(/(\.[xyzw]{1,1})/);						
-						if (selmatch.length==0)
+						if (selmatch.length == 0)
 						{
 							_error = "error: bad index register select"; 
 							badreg = true; 
-							break;						
+							break;
 						}
 						relsel = selmatch[0].charCodeAt(1) - "x".charCodeAt(0);
 						if (relsel > 2)
-							relsel = 3; 
+							relsel = 3;
 						var relofs:Array = relreg[0].match(/\+\d{1,3}/ig);
-						if (relofs.length > 0) 
-							reloffset = relofs[0]; 						
+						if (relofs.length > 0)
+							reloffset = relofs[0];
 						if (reloffset < 0 || reloffset > 255)
 						{
-							_error = "error: index offset "+reloffset+" out of bounds. [0..255]"; 
-							badreg = true; 
-							break;							
+							_error = "error: index offset " + reloffset + " out of bounds. [0..255]";
+							badreg = true;
+							break;
 						}
 						if (verbose)
-							trace("RELATIVE: type="+reltype+"=="+relname[0]+" sel="+relsel+"=="+selmatch[0]+" idx="+regidx+" offset="+reloffset); 
+							trace("RELATIVE: type=" + reltype + "==" + relname[0] + " sel=" + relsel + "==" + selmatch[0] + " idx=" + regidx + " offset=" + reloffset);
 					}
 					
 					if (verbose)
-						trace("  emit argcode="+regFound+"["+regidx+"]["+regmask+"]");
+						trace("  emit argcode=" + regFound + "[" + regidx + "][" + regmask + "]");
 					if (isDest)
-					{												
+					{
 						agalcode.writeShort(regidx);
 						agalcode.writeByte(regmask);
 						agalcode.writeByte(regFound.emitCode);
-						pad -= 32; 
-					} else
+						pad -= 32;
+					}
+					else
 					{
 						if (isSampler)
 						{
 							if (verbose)
 								trace("  emit sampler");
-							var samplerbits:uint = 5; // type 5 
+							var samplerbits:uint = 5; // type 5
 							var optsLength:uint = opts == null ? 0 : opts.length;
-							var bias:Number = 0; 
-							for (k = 0; k<optsLength; k++)
+							var bias:Number = 0;
+							for (k = 0; k < optsLength; k++)
 							{
 								if (verbose)
 									trace("    opt: "+opts[k]);
-								var optfound:Sampler = SAMPLEMAP [opts[k]];
+								var optfound:Sampler = SAMPLEMAP[opts[k]];
 								if (optfound == null)
 								{
 									// todo check that it's a number...
 									//trace("Warning, unknown sampler option: "+opts[k]);
-									bias = Number(opts[k]); 
+									bias = Number(opts[k]);
 									if (verbose)
 										trace("    bias: " + bias);																	
 								}
@@ -359,12 +360,12 @@ package com.adobe.utils
 								{
 									if (optfound.flag != SAMPLER_SPECIAL_SHIFT)
 										samplerbits &= ~(0xf << optfound.flag);										
-									samplerbits |= uint(optfound.mask) << uint(optfound.flag);
+									samplerbits |= optfound.mask << optfound.flag;
 								}
 							}
 							agalcode.writeShort(regidx);
-							agalcode.writeByte(int(bias*8.0));
-							agalcode.writeByte(0);							
+							agalcode.writeByte(int(bias * 8));
+							agalcode.writeByte(0);				
 							agalcode.writeUnsignedInt(samplerbits);
 							
 							if (verbose)
@@ -412,9 +413,9 @@ package com.adobe.utils
 				var agalLength:uint = agalcode.length;
 				for (var index:uint = 0; index < agalLength; index++)
 				{
-					if (!(index % 16))
+					if (index % 16 == 0)
 						dbgLine += "\n";
-					if (!(index % 4))
+					if (index % 4 == 0)
 						dbgLine += " ";
 					
 					var byteStr:String = agalcode[index].toString(16);
@@ -642,30 +643,23 @@ package com.adobe.utils
 }
 
 class OpCode
-{		
+{
 	public function OpCode(name:String, numRegister:uint, emitCode:uint, flags:uint)
 	{
-		_name = name;
-		_numRegister = numRegister;
-		_emitCode = emitCode;
-		_flags = flags;
+		this.name = name;
+		this.numRegister = numRegister;
+		this.emitCode = emitCode;
+		this.flags = flags;
 	}
 	
-	private var _emitCode:uint;
-	public function get emitCode():uint { return _emitCode; }
-	
-	private var _flags:uint;
-	public function get flags():uint { return _flags; }
-	
-	private var _name:String;
-	public function get name():String { return _name; }
-	
-	private var _numRegister:uint;
-	public function get numRegister():uint { return _numRegister; }
+	public var name:String;
+	public var numRegister:uint;
+	public var emitCode:uint;
+	public var flags:uint;
 	
 	public function toString():String
 	{
-		return "[OpCode name=\""+_name+"\", numRegister="+_numRegister+", emitCode="+_emitCode+", flags="+_flags+"]";
+		return "[OpCode name=\"" + name + "\", numRegister=" + numRegister + ", emitCode=" + emitCode+", flags=" + flags + "]";
 	}
 }
 
@@ -673,31 +667,22 @@ class Register
 {
 	public function Register(name:String, longName:String, emitCode:uint, range:uint, flags:uint)
 	{
-		_name = name;
-		_longName = longName;
-		_emitCode = emitCode;
-		_range = range;
-		_flags = flags;
+		this.name = name;
+		this.longName = longName;
+		this.emitCode = emitCode;
+		this.range = range;
+		this.flags = flags;
 	}
 	
-	private var _emitCode:uint;
-	public function get emitCode():uint { return _emitCode; }
-	
-	private var _name:String;
-	public function get name():String { return _name; }
-	
-	private var _longName:String;
-	public function get longName():String { return _longName; }
-	
-	private var _flags:uint;
-	public function get flags():uint { return _flags; }
-	
-	private var _range:uint;
-	public function get range():uint { return _range; }
+	public var emitCode:uint;
+	public var name:String;
+	public var longName:String;
+	public var flags:uint;
+	public var range:uint;
 	
 	public function toString():String
 	{
-		return "[Register name=\""+_name+"\", longName=\""+_longName+"\", emitCode="+_emitCode+", range="+_range+", flags="+ _flags+"]";
+		return "[Register name=\"" + name + "\", longName=\"" + longName + "\", emitCode=" +  emitCode + ", range=" + range + ", flags=" + flags + "]";
 	}
 }
 
@@ -705,22 +690,17 @@ class Sampler
 {
 	public function Sampler(name:String, flag:uint, mask:uint)
 	{
-		_name = name;
-		_flag = flag;
-		_mask = mask;
+		this.name = name;
+		this.flag = flag;
+		this.mask = mask;
 	}
 	
-	private var _flag:uint;
-	public function get flag():uint	{ return _flag; }
-	
-	private var _mask:uint;
-	public function get mask():uint	{ return _mask; }
-	
-	private var _name:String;
-	public function get name():String { return _name; }
+	public var name:String;
+	public var flag:uint;
+	public var mask:uint;
 	
 	public function toString():String
 	{
-		return "[Sampler name=\""+_name+"\", flag=\""+_flag+"\", mask="+mask+"]";
+		return "[Sampler name=\"" + name + "\", flag=\"" + flag + "\", mask=" + mask + "]";
 	}
 }
