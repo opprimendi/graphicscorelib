@@ -172,10 +172,10 @@ package com.adobe.utils
 				if (!regs || regs.length != opFound.numRegister)
 				{
 					_error = "error: wrong number of operands. found " + regs.length + " but expected " + opFound.numRegister + ".";
-					break;		
+					break;
 				}
 				
-				var badreg:Boolean;
+				var badreg:Boolean = false;
 				var pad:uint = 64 + 64 + 32;
 				var regLength:uint = regs.length;
 				
@@ -252,13 +252,13 @@ package com.adobe.utils
 						break;
 					}
 					
-					var regmask:uint;
+					var regmask:uint = 0;
 					var maskmatch:Array	= regs[j].match(/(\.[xyzw]{1,4})/);
 					var isDest:Boolean = j == 0 && !(opFound.flags & OP_NO_DEST);
 					var isSampler:Boolean = j == 2 && (opFound.flags & OP_SPECIAL_TEX);
-					var reltype:uint;
-					var relsel:uint;
-					var reloffset:int;
+					var reltype:uint = 0;
+					var relsel:uint = 0;
+					var reloffset:int = 0;
 					
 					if (isDest && isRelative)
 					{
