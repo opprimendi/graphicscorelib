@@ -96,8 +96,7 @@ package com.adobe.utils
 			
 			for (i = 0; i < lng && _error == ""; i++)
 			{
-				var line:String = new String(lines[i]);
-				line = line.replace(REGEXP_OUTER_SPACES, "");
+				var line:String = lines[i].replace(REGEXP_OUTER_SPACES, "");
 				
 				// remove comments
 				var startcomment:int = line.search("//");
@@ -370,11 +369,11 @@ package com.adobe.utils
 								{
 									if (optfound.flag != SAMPLER_SPECIAL_SHIFT)
 										samplerbits &= ~(0xf << optfound.flag);
-									samplerbits |= uint(optfound.mask) << uint(optfound.flag);
+									samplerbits |= optfound.mask << optfound.flag;
 								}
 							}
 							agalcode.writeShort(regidx);
-							agalcode.writeByte(int(bias * 8.0));
+							agalcode.writeByte(int(bias * 8));
 							agalcode.writeByte(0);
 							agalcode.writeUnsignedInt(samplerbits);
 							
