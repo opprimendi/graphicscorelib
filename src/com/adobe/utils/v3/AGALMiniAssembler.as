@@ -661,87 +661,63 @@ package com.adobe.utils.v3
 
 class OpCode
 {
-	private var _emitCode:uint;
-	private var _flags:uint;
-	private var _name:String;
-	private var _numRegister:uint;
-	
-	public function get emitCode():uint  { return _emitCode; }
-	
-	public function get flags():uint  { return _flags; }
-	
-	public function get name():String  { return _name; }
-	
-	public function get numRegister():uint  { return _numRegister; }
-	
 	public function OpCode(name:String, numRegister:uint, emitCode:uint, flags:uint)
 	{
-		_name = name;
-		_numRegister = numRegister;
-		_emitCode = emitCode;
-		_flags = flags;
+		this.name = name;
+		this.numRegister = numRegister;
+		this.emitCode = emitCode;
+		this.flags = flags;
 	}
+	
+	public var name:String;
+	public var numRegister:uint;
+	public var emitCode:uint;
+	public var flags:uint;
 	
 	public function toString():String
 	{
-		return "[OpCode name=\"" + _name + "\", numRegister=" + _numRegister + ", emitCode=" + _emitCode + ", flags=" + _flags + "]";
+		return "[OpCode name=\"" + name + "\", numRegister=" + numRegister + ", emitCode=" + emitCode + ", flags=" + flags + "]";
 	}
 }
 
 class Register
 {
-	private var _emitCode:uint;
-	private var _name:String;
-	private var _longName:String;
-	private var _flags:uint;
-	private var _range:uint;
-	
-	public function get emitCode():uint  { return _emitCode; }
-	
-	public function get longName():String  { return _longName; }
-	
-	public function get name():String  { return _name; }
-	
-	public function get flags():uint  { return _flags; }
-	
-	public function get range():uint  { return _range; }
-	
 	public function Register(name:String, longName:String, emitCode:uint, range:uint, flags:uint)
 	{
-		_name = name;
-		_longName = longName;
-		_emitCode = emitCode;
-		_range = range;
-		_flags = flags;
+		this.name = name;
+		this.longName = longName;
+		this.emitCode = emitCode;
+		this.range = range;
+		this.flags = flags;
 	}
+	
+	public var name:String;
+	public var longName:String;
+	public var emitCode:uint;
+	public var range:uint;
+	public var flags:uint;
 	
 	public function toString():String
 	{
-		return "[Register name=\"" + _name + "\", longName=\"" + _longName + "\", emitCode=" + _emitCode + ", range=" + _range + ", flags=" + _flags + "]";
+		return "[Register name=\"" + name + "\", longName=\"" + longName + "\", emitCode=" + emitCode + ", range=" + range + ", flags=" + flags + "]";
 	}
 }
 
 class Sampler
 {
-	private var _flag:uint;
-	private var _mask:uint;
-	private var _name:String;
-	
-	public function get flag():uint  { return _flag; }
-	
-	public function get mask():uint  { return _mask; }
-	
-	public function get name():String  { return _name; }
-	
 	public function Sampler(name:String, flag:uint, mask:uint)
 	{
-		_name = name;
-		_flag = flag;
-		_mask = mask;
+		this.name = name;
+		this.flag = flag;
+		this.mask = mask;
 	}
+	
+	public var name:String;
+	public var flag:uint;
+	public var mask:uint;
 	
 	public function toString():String
 	{
-		return "[Sampler name=\"" + _name + "\", flag=\"" + _flag + "\", mask=" + mask + "]";
+		return "[Sampler name=\"" + name + "\", flag=\"" + flag + "\", mask=" + mask + "]";
 	}
 }
