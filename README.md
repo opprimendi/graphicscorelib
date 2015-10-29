@@ -1,4 +1,4 @@
-Adobe graphics core lib [![Build Status](https://travis-ci.org/opprimendi/graphicscorelib.svg)](https://travis-ci.orgopprimendi/graphicscorelib)
+Adobe graphics core lib [![Build Status](https://travis-ci.org/opprimendi/graphicscorelib.svg)](https://travis-ci.org/opprimendi/graphicscorelib)
 ==================================================
 
 A Flash Platform SDK, a nice toolbox with libs for every ActionScript 3 developer.
