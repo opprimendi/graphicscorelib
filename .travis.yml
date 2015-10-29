@@ -9,7 +9,7 @@ env:
 - TERM=dumb
 before_script:
 - brew update >brew-update.log
-- brew install ant gradle >brew-install.log
+- brew install ant >brew-install.log
 - brew install caskroom/cask/brew-cask
 - brew cask install flash-player-debugger
 - export FLASHPLAYER_DEBUGGER="$HOME/Applications/Flash Player Debugger.app/Contents/MacOS/Flash
@@ -37,6 +37,6 @@ deploy:
   provider: releases
   api_key:
     secure: MVqBEzdBFMUZxFberVcyTVIHKQhRAzkggu7ryx3fsWF+20qnMo/elFCJdhw9MlsF2x4AqzUBnOVTcn7w3VOj9X6/EE8LEAMUmp2aUV9FK2cg/WpqkpbxkR7qadqRluRiiyLq48p1NaFXwwqFVj5pimHBXOC6dPEuc5QnrDvFC2LOs79Mi5ZMOchh53VPfFvTRe0HdAcJXyb8q64CZUN6UTDxuyVKZh5WglcP0vA+qpCCEeBAtbAHUTGpEFlB7AI570Ym9kuLBnEVqUistGPBvxs88SuoR+atdw16tNMGIJR1vPl85XdMbfLmjUbvlTWsDDpyCqmu2poX8+/zfwZlqAq2oCG7SrhdExMVuSW0T7I05yz278c74V4Z+0mgPUv5wbKErPP8J2Ps0y9mrvw4OIvodUCxRLnUDB+u92/tbNRwL5flXtxIhRqqiX7rZ1FtLbeza3/7wU+ypucVaoQq8thpWPmBsDz/1nrwukXG8ztBHRp0f8RbugaFqnk9airAgOj/ppVRqjCD+rlUcoEfBRmH/8qmjheEKZG3dCg8Z4ty63OsGdQ0X2Wn/MRofmS8ACcTcb59/lfEdNvCr/zmlhWJjLC+n+WpJTZNluMTgz4LCD5yX7t3otyHwiMO2iekUPviBGdhfIdFuXkI6ZlJvKDjiGRj9InLktFne+LZHSo=
-  file: lib/adobe-graphicscorelib-3.0.$TRAVIS_BUILD_NUMBER.swc
+  file: $TRAVIS_BUILD_DIR/lib/adobe-graphicscorelib-3.0.$TRAVIS_BUILD_NUMBER.swc
   on:
     repo: opprimendi/graphicscorelib
