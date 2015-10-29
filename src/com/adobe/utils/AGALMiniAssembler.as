@@ -37,16 +37,28 @@ package com.adobe.utils
 	{
 		protected static const USE_NEW_SYNTAX:Boolean = false;
 		protected static const REGEXP_OUTER_SPACES:RegExp = /^\s+|\s+$/g;
+		protected static const REGEXP_LINES:RegExp = /[\f\n\r\v]+/g;
+		protected static const REGEXP_OPTSI:RegExp = /<.*>/g;
+		protected static const REGEXP_OPTS:RegExp = /([\w\.\-\+]+)/gi;
+		protected static const REGEXP_OPCODE:RegExp = /^\w{3}/ig;
+		protected static const REGEXP_REGS_NEW_SYNTAX:RegExp = /vc\[([vif][acost]?)(\d*)?(\.[xyzw](\+\d{1,3})?)?\](\.[xyzw]{1,4})?|([vif][acost]?)(\d*)?(\.[xyzw]{1,4})?/gi;
+		protected static const REGEXP_REGS_OLD_SYNTAX:RegExp = /vc\[([vof][actps]?)(\d*)?(\.[xyzw](\+\d{1,3})?)?\](\.[xyzw]{1,4})?|([vof][actps]?)(\d*)?(\.[xyzw]{1,4})?/gi;
+		protected static const REGEXP_RELREG:RegExp = /\[.*\]/ig;
+		protected static const REGEXP_RES:RegExp = /^\b[A-Za-z]{1,2}/ig;
+		protected static const REGEXP_IDX:RegExp = /\d+/;
+		protected static const REGEXP_MASK:RegExp = /(\.[xyzw]{1,4})/;
+		protected static const REGEXP_RELNAME:RegExp = /[A-Za-z]{1,2}/ig;
+		protected static const REGEXP_SEL:RegExp = /(\.[xyzw]{1,1})/;
+		protected static const REGEXP_RELOFS:RegExp = /\+\d{1,3}/ig;
 		
-		// AGAL bytes and error buffer 
-		private var _agalcode:ByteArray = null;
-		private var _error:String = "";
 		private var debugEnabled:Boolean = false;
 		private static var initialized:Boolean = false;
 		public var verbose:Boolean = false;
 		
+		private var _error:String = "";
 		public function get error():String  { return _error; }
 		
+		private var _agalcode:ByteArray = null;
 		public function get agalcode():ByteArray  { return _agalcode; }
 		
 		public function AGALMiniAssembler(debugging:Boolean = false):void
@@ -58,7 +70,7 @@ package com.adobe.utils
 		
 		public function assemble(mode:String, source:String):ByteArray
 		{
-			var start:uint = getTimer();
+			var start:int = verbose ? getTimer() : 0;
 			
 			_agalcode = new ByteArray();
 			_error = "";
@@ -71,12 +83,12 @@ package com.adobe.utils
 				_error = 'ERROR: mode needs to be "' + FRAGMENT + '" or "' + VERTEX + '" but is "' + mode + '".';
 			
 			agalcode.endian = Endian.LITTLE_ENDIAN;
-			agalcode.writeByte(0xa0);				// tag version
-			agalcode.writeUnsignedInt(0x1);		// AGAL version, big endian, bit pattern will be 0x01000000
-			agalcode.writeByte(0xa1);				// tag program id
+			agalcode.writeByte(0xa0);// tag version
+			agalcode.writeUnsignedInt(0x1);// AGAL version, big endian, bit pattern will be 0x01000000
+			agalcode.writeByte(0xa1);// tag program id
 			agalcode.writeByte(isFrag ? 1 : 0);	// vertex or fragment
 			
-			var lines:Array = source.replace(/[\f\n\r\v]+/g, "\n").split("\n");
+			var lines:Array = source.replace(REGEXP_LINES, "\n").split("\n");
 			var nest:int = 0;
 			var nops:int = 0;
 			var i:int;
@@ -93,16 +105,16 @@ package com.adobe.utils
 					line = line.slice(0, startcomment);
 				
 				// grab options
-				var optsi:int = line.search(/<.*>/g);
+				var optsi:int = line.search(REGEXP_OPTSI);
 				var opts:Array;
 				if (optsi != -1)
 				{
-					opts = line.slice(optsi).match(/([\w\.\-\+]+)/gi);
+					opts = line.slice(optsi).match(REGEXP_OPTS);
 					line = line.slice(0, optsi);
 				}
 				
 				// find opcode
-				var opCode:Array = line.match(/^\w{3}/ig);
+				var opCode:Array = line.match(REGEXP_OPCODE);
 				if (!opCode)
 				{
 					if (line.length >= 3)
@@ -163,9 +175,9 @@ package com.adobe.utils
 				// get operands, use regexp
 				var regs:Array;
 				if (USE_NEW_SYNTAX)
-					regs = line.match(/vc\[([vif][acost]?)(\d*)?(\.[xyzw](\+\d{1,3})?)?\](\.[xyzw]{1,4})?|([vif][acost]?)(\d*)?(\.[xyzw]{1,4})?/gi);
+					regs = line.match(REGEXP_REGS_NEW_SYNTAX);
 				else
-					regs = line.match(/vc\[([vof][actps]?)(\d*)?(\.[xyzw](\+\d{1,3})?)?\](\.[xyzw]{1,4})?|([vof][actps]?)(\d*)?(\.[xyzw]{1,4})?/gi);
+					regs = line.match(REGEXP_REGS_OLD_SYNTAX);
 				
 				if (!regs || regs.length != opFound.numRegister)
 				{
@@ -180,7 +192,7 @@ package com.adobe.utils
 				for (var j:int = 0; j < regLength; j++)
 				{
 					var isRelative:Boolean = false;
-					var relreg:Array = regs[j].match(/\[.*\]/ig);
+					var relreg:Array = regs[j].match(REGEXP_RELREG);
 					if (relreg && relreg.length > 0)
 					{
 						regs[j] = regs[j].replace(relreg[0], "0");
@@ -190,7 +202,7 @@ package com.adobe.utils
 						isRelative = true;
 					}
 					
-					var res:Array = regs[j].match(/^\b[A-Za-z]{1,2}/ig);
+					var res:Array = regs[j].match(REGEXP_RES);
 					if (!res)
 					{
 						_error = "error: could not parse operand " + j + " (" + regs[j] + ").";
@@ -237,7 +249,7 @@ package com.adobe.utils
 					
 					regs[j] = regs[j].slice(regs[j].search(regFound.name) + regFound.name.length);
 					//trace( "REGNUM: " +regs[j] );
-					var idxmatch:Array = isRelative ? relreg[0].match(/\d+/) : regs[j].match(/\d+/);
+					var idxmatch:Array = isRelative ? relreg[0].match(REGEXP_IDX) : regs[j].match(REGEXP_IDX);
 					var regidx:uint = 0;
 					
 					if (idxmatch)
@@ -251,7 +263,7 @@ package com.adobe.utils
 					}
 					
 					var regmask:uint = 0;
-					var maskmatch:Array = regs[j].match(/(\.[xyzw]{1,4})/);
+					var maskmatch:Array = regs[j].match(REGEXP_MASK);
 					var isDest:Boolean = (j == 0 && !(opFound.flags & OP_NO_DEST));
 					var isSampler:Boolean = (j == 2 && (opFound.flags & OP_SPECIAL_TEX));
 					var reltype:uint = 0;
@@ -291,7 +303,7 @@ package com.adobe.utils
 					
 					if (isRelative)
 					{
-						var relname:Array = relreg[0].match(/[A-Za-z]{1,2}/ig);
+						var relname:Array = relreg[0].match(REGEXP_RELNAME);
 						var regFoundRel:Register = REGMAP[relname[0]];
 						if (regFoundRel == null)
 						{
@@ -300,7 +312,7 @@ package com.adobe.utils
 							break;
 						}
 						reltype = regFoundRel.emitCode;
-						var selmatch:Array = relreg[0].match(/(\.[xyzw]{1,1})/);
+						var selmatch:Array = relreg[0].match(REGEXP_SEL);
 						if (selmatch.length == 0)
 						{
 							_error = "error: bad index register select";
@@ -310,7 +322,7 @@ package com.adobe.utils
 						relsel = selmatch[0].charCodeAt(1) - "x".charCodeAt(0);
 						if (relsel > 2)
 							relsel = 3;
-						var relofs:Array = relreg[0].match(/\+\d{1,3}/ig);
+						var relofs:Array = relreg[0].match(REGEXP_RELOFS);
 						if (relofs.length > 0)
 							reloffset = relofs[0];
 						if (reloffset < 0 || reloffset > 255)
